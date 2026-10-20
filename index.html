@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ai Content Lab - App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Myanmar:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', 'Noto Sans Myanmar', sans-serif;
+            background-color: #f8fafc;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+        .tiktok-gradient {
+            background: linear-gradient(135deg, #25F4EE 0%, #FE2C55 100%);
+        }
+        .tiktok-text {
+            background: linear-gradient(135deg, #111111 0%, #FE2C55 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Loader Animation for AI */
+        .typing-indicator span {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background-color: #FE2C55;
+            border-radius: 50%;
+            animation: typing 1s infinite alternate;
+            margin: 0 2px;
+        }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing {
+            0% { transform: translateY(0); opacity: 0.5; }
+            100% { transform: translateY(-4px); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden text-slate-800">
+
+    <aside class="w-64 bg-slate-900 text-white flex flex-col hidden md:flex transition-all duration-300 z-20 shadow-xl">
+        <div class="p-6 flex items-center gap-3 border-b border-slate-800">
+            <div class="w-10 h-10 rounded-xl tiktok-gradient flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                <i class="fa-solid fa-flask"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg leading-tight tracking-wide">Ai Content</h1>
+                <p class="text-xs text-slate-400 font-semibold tracking-widest uppercase">Lab</p>
+            </div>
+        </div>
+        
+        <nav class="flex-1 p-4 space-y-2 mt-4">
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left bg-slate-800 text-white font-medium transition-colors">
+                <i class="fa-solid fa-chart-pie w-5 text-center"></i>
+                Strategy Dashboard
+            </button>
+            <button onclick="switchTab('calendar')" id="nav-calendar" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-slate-400 hover:bg-slate-800 hover:text-white font-medium transition-colors">
+                <i class="fa-solid fa-calendar-days w-5 text-center"></i>
+                30-Day Calendar
+            </button>
+            <button onclick="switchTab('ai-assistant')" id="nav-ai-assistant" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-slate-400 hover:bg-slate-800 hover:text-white font-medium transition-colors relative">
+                <i class="fa-solid fa-robot w-5 text-center"></i>
+                AI Assistant
+                <span class="absolute right-3 top-3.5 flex h-3 w-3">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-[#FE2C55]"></span>
+                </span>
+            </button>
+        </nav>
+        
+        <div class="p-4 border-t border-slate-800">
+            <div class="bg-slate-800 rounded-xl p-4 text-sm">
+                <p class="text-slate-400 mb-2">Current Focus:</p>
+                <p class="font-bold text-white flex items-center gap-2"><i class="fa-solid fa-location-dot text-[#FE2C55]"></i> Hledan & Sule</p>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        <!-- Mobile Header -->
+        <header class="md:hidden bg-slate-900 text-white p-4 flex justify-between items-center z-20 shadow-md">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-flask text-[#FE2C55]"></i>
+                <h1 class="font-bold">Ai Content Lab</h1>
+            </div>
+            <button onclick="toggleMobileMenu()" class="text-white text-xl"><i class="fa-solid fa-bars"></i></button>
+        </header>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden absolute top-14 left-0 w-full bg-slate-900 z-30 shadow-xl border-t border-slate-800">
+            <nav class="p-4 space-y-2">
+                <button onclick="switchTab('dashboard'); toggleMobileMenu()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-white bg-slate-800 font-medium">Strategy</button>
+                <button onclick="switchTab('calendar'); toggleMobileMenu()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-white hover:bg-slate-800 font-medium">Calendar</button>
+                <button onclick="switchTab('ai-assistant'); toggleMobileMenu()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-white hover:bg-slate-800 font-medium">AI Assistant</button>
+            </nav>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 relative">
+            
+            <section id="tab-dashboard" class="tab-content max-w-6xl mx-auto space-y-8 animate-fade-in block">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-extrabold text-slate-900 mb-2 tiktok-text">TikTok Marketing Strategy</h2>
+                    <p class="text-slate-500">Brand များကို ဆွဲဆောင်မည့် နည်းဗျူဟာနှင့် အစီအစဉ်များ</p>
+                </div>
+
+                <!-- Stats/Core Vision -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass-panel p-6 rounded-2xl border-t-4 border-[#FE2C55]">
+                        <div class="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center mb-4">
+                            <i class="fa-solid fa-microphone text-2xl text-[#FE2C55]"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">Street Q&A</h3>
+                        <p class="text-slate-600 text-sm">ပျော်ရွှင်စရာ လမ်းဘေးမေးခွန်းများဖြင့် Follower အသစ်များရှာဖွေခြင်း။</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-2xl border-t-4 border-[#25F4EE]">
+                        <div class="w-12 h-12 rounded-full bg-cyan-100 flex items-center justify-center mb-4">
+                            <i class="fa-solid fa-gamepad text-2xl text-[#25F4EE]"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">Mini-Games</h3>
+                        <p class="text-slate-600 text-sm">လူထုနဲ့ဆော့မယ့် ဂိမ်းတိုများ။ Product Placement အတွက် အဓိကနေရာ။</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-2xl border-t-4 border-slate-900">
+                        <div class="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center mb-4">
+                            <i class="fa-solid fa-plane text-2xl text-slate-900"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">Travel Vlogs</h3>
+                        <p class="text-slate-600 text-sm">ရန်ကုန်ပြင်ပ ခရီးသွားအစီအစဉ်များနှင့် Trend အလိုက် Lifestyle Content။</p>
+                    </div>
+                </div>
+
+                <!-- Strategy & Revenue Layout -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+                        <h3 class="text-2xl font-bold mb-6 flex items-center gap-3"><i class="fa-solid fa-bullseye text-[#FE2C55]"></i> Target Locations</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-4 border border-slate-100 rounded-xl flex flex-col items-center justify-center text-center hover:shadow-md transition">
+                                <i class="fa-solid fa-location-dot text-3xl mb-2 text-slate-800"></i>
+                                <span class="font-bold">လှည်းတန်း</span>
+                            </div>
+                            <div class="p-4 border border-slate-100 rounded-xl flex flex-col items-center justify-center text-center hover:shadow-md transition">
+                                <i class="fa-solid fa-building text-3xl mb-2 text-slate-800"></i>
+                                <span class="font-bold">ဆူးလေ / Junction</span>
+                            </div>
+                            <div class="p-4 border border-slate-100 rounded-xl flex flex-col items-center justify-center text-center hover:shadow-md transition">
+                                <i class="fa-solid fa-store text-3xl mb-2 text-slate-800"></i>
+                                <span class="font-bold">မြေနီကုန်း</span>
+                            </div>
+                            <div class="p-4 border border-slate-100 rounded-xl flex flex-col items-center justify-center text-center hover:shadow-md transition">
+                                <i class="fa-solid fa-water text-3xl mb-2 text-slate-800"></i>
+                                <span class="font-bold">အင်းလျားကန်ဘောင်</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 text-white rounded-2xl shadow-sm p-8">
+                        <h3 class="text-2xl font-bold mb-6 flex items-center gap-3"><i class="fa-solid fa-sack-dollar text-[#25F4EE]"></i> Marketing & Revenue</h3>
+                        <ul class="space-y-6">
+                            <li class="flex items-start gap-4">
+                                <div class="mt-1 bg-[#FE2C55] rounded-full p-1"><i class="fa-solid fa-check text-xs"></i></div>
+                                <div>
+                                    <h4 class="font-bold text-lg">သဘာဝကျကျ ကြော်ငြာခြင်း (Soft Selling)</h4>
+                                    <p class="text-slate-400 text-sm mt-1">Product များကို အတင်းမရောင်းဘဲ အသုံးပြုပြခြင်း၊ အမေးအဖြေတွင် ထည့်သုံးခြင်း။</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-4">
+                                <div class="mt-1 bg-[#FE2C55] rounded-full p-1"><i class="fa-solid fa-check text-xs"></i></div>
+                                <div>
+                                    <h4 class="font-bold text-lg">ဂိမ်းများတွင် ထည့်သွင်းခြင်း</h4>
+                                    <p class="text-slate-400 text-sm mt-1">Mini-games များတွင် ဆုလက်ဆောင်အဖြစ် Sponsor ပစ္စည်းများ ပေးခြင်း။</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-4">
+                                <div class="mt-1 bg-[#FE2C55] rounded-full p-1"><i class="fa-solid fa-check text-xs"></i></div>
+                                <div>
+                                    <h4 class="font-bold text-lg">Direct Ads & Sponsorships</h4>
+                                    <p class="text-slate-400 text-sm mt-1">Video အစ/အဆုံး တွင် Brand များကို တိုက်ရိုက် Mentions ခေါ်ပေးခြင်း။</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tab-calendar" class="tab-content hidden max-w-7xl mx-auto animate-fade-in h-full flex flex-col">
+                <div class="mb-6 flex justify-between items-end">
+                    <div>
+                        <h2 class="text-3xl font-extrabold text-slate-900 mb-2">Content Calendar</h2>
+                        <p class="text-slate-500">ရက် (၃၀) စာ ရိုက်ကူးရေး အစီအစဉ်</p>
+                    </div>
+                    <div class="hidden sm:flex gap-2">
+                        <span class="px-3 py-1 bg-pink-100 text-[#FE2C55] rounded-full text-xs font-bold">Week 1: Audience</span>
+                        <span class="px-3 py-1 bg-cyan-100 text-[#0d9488] rounded-full text-xs font-bold">Week 2: Engagement</span>
+                        <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold">Week 3: Product Placement</span>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto pr-2 pb-10">
+                    <div id="calendar-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                        <!-- Calendar cards will be generated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <section id="tab-ai-assistant" class="tab-content hidden max-w-4xl mx-auto h-full flex flex-col animate-fade-in relative">
+                
+                <!-- Chat Header -->
+                <div class="bg-white rounded-t-2xl border border-b-0 border-slate-200 p-4 flex items-center justify-between shadow-sm z-10">
+                    <div class="flex items-center gap-3">
+                        <div class="relative">
+                            <div class="w-12 h-12 rounded-full tiktok-gradient flex items-center justify-center text-white text-xl shadow-md">
+                                <i class="fa-solid fa-robot"></i>
+                            </div>
+                            <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-lg">Lab Assistant AI</h2>
+                            <p class="text-xs text-slate-500">Q&A နဲ့ ဂိမ်းအိုင်ဒီယာ အသစ်များ တောင်းဆိုနိုင်ပါသည်။</p>
+                        </div>
+                    </div>
+                    <button onclick="clearChat()" class="text-slate-400 hover:text-[#FE2C55] transition" title="Clear Chat">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+
+                <!-- Chat History -->
+                <div id="chat-history" class="flex-1 bg-slate-50 border border-slate-200 p-4 overflow-y-auto flex flex-col gap-4">
+                    
+                    <!-- Welcome Message -->
+                    <div class="flex justify-start">
+                        <div class="bg-white border border-slate-200 text-slate-800 rounded-2xl rounded-tl-sm p-4 max-w-[85%] shadow-sm">
+                            <p class="mb-2">မင်္ဂလာပါ။ <strong>Ai Content Lab</strong> ရဲ့ အကူအညီပေးရေး AI ကနေ ကြိုဆိုပါတယ်။</p>
+                            <p class="text-sm">ဒီနေ့ ဘယ်လို Content မျိုး ရိုက်ချင်လဲ? Q&A အသစ်မေးမလား? (သို့) Sponsor ပစ္စည်း ကြော်ငြာဖို့ ဂိမ်းစဉ်းစားပေးရမလား?</p>
+                            
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                <button onclick="sendPrompt('ဒီနေ့အတွက် ရယ်စရာ Q&A မေးခွန်း အသစ် ၃ ခုလောက် စဉ်းစားပေးပါ။')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-full transition border border-slate-200">
+                                    <i class="fa-regular fa-comment-dots mr-1 text-[#FE2C55]"></i> Q&A မေးခွန်းများ
+                                </button>
+                                <button onclick="sendPrompt('လူထုနဲ့ဆော့လို့ရမယ့် ဆုပေးတဲ့ Mini-game အသစ်တစ်ခု စဉ်းစားပေးပါ။')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-full transition border border-slate-200">
+                                    <i class="fa-solid fa-dice mr-1 text-[#25F4EE]"></i> Mini Game အိုင်ဒီယာ
+                                </button>
+                                <button onclick="sendPrompt('Energy Drink တစ်ဘူးကို လမ်းဘေး Q&A ဗီဒီယိုထဲမှာ သဘာဝကျကျ ဘယ်လိုကြော်ငြာမလဲ?')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-full transition border border-slate-200">
+                                    <i class="fa-solid fa-bullhorn mr-1 text-purple-500"></i> ကြော်ငြာရန် အကြံပြုချက်
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Chat Input Box -->
+                <div class="bg-white rounded-b-2xl border border-t-0 border-slate-200 p-4 shadow-sm relative">
+                    <div id="ai-loading" class="hidden absolute -top-8 left-4 bg-white px-4 py-1.5 rounded-full shadow-md text-xs font-semibold text-slate-600 flex items-center gap-2 border border-slate-100">
+                        AI စဉ်းစားနေသည် <div class="typing-indicator"><span></span><span></span><span></span></div>
+                    </div>
+                    <form id="chat-form" onsubmit="handleChatSubmit(event)" class="flex gap-2 relative">
+                        <input type="text" id="chat-input" placeholder="AI ကို မေးခွန်းမေးရန် ဤနေရာတွင် ရိုက်ထည့်ပါ..." autocomplete="off"
+                            class="flex-1 bg-slate-100 border-transparent focus:bg-white focus:border-[#FE2C55] focus:ring-2 focus:ring-pink-100 rounded-xl px-4 py-3 outline-none transition duration-200">
+                        <button type="submit" id="send-btn" class="bg-slate-900 hover:bg-[#FE2C55] text-white px-6 rounded-xl font-bold transition duration-300 shadow-md flex items-center justify-center">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script>
+        // ----------------------------------------------------
+        // Navigation & Tab Logic
+        // ----------------------------------------------------
+        function switchTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+                tab.classList.remove('block');
+            });
+            // Show target tab
+            const activeTab = document.getElementById(`tab-${tabId}`);
+            if(activeTab) {
+                activeTab.classList.remove('hidden');
+                activeTab.classList.add('block');
+            }
+
+            // Update nav styling (Desktop)
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-slate-800', 'text-white');
+                btn.classList.add('text-slate-400');
+            });
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if(activeBtn) {
+                activeBtn.classList.add('bg-slate-800', 'text-white');
+                activeBtn.classList.remove('text-slate-400');
+            }
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // ----------------------------------------------------
+        // Calendar Data Generation (30 Days based on Strategy)
+        // ----------------------------------------------------
+        const calendarData = [
+            { day: 1, type: 'Q&A', title: 'ရန်ကုန်မှာ အကြိုက်ဆုံးနေရာက ဘယ်လဲ?', desc: 'Intro Video လှည်းတန်းလမ်းဆုံ', icon: 'fa-microphone', color: 'text-[#FE2C55]', bg: 'bg-pink-50' },
+            { day: 2, type: 'Game', title: 'မြန်မာစာလုံး အမြန်ပြော', desc: 'စက္ကန့် ၃၀ အတွင်း "က" ဖြင့်စသော စကားလုံးများ', icon: 'fa-gamepad', color: 'text-[#25F4EE]', bg: 'bg-cyan-50' },
+            { day: 3, type: 'Q&A', title: 'ရည်းစားဟောင်းကို တစ်ခွန်းလောက်...', desc: 'Viral ဖြစ်လွယ်သော ခေါင်းစဉ်မေးမြန်းခြင်း', icon: 'fa-microphone', color: 'text-[#FE2C55]', bg: 'bg-pink-50' },
+            { day: 4, type: 'Game', title: 'ရေဘူးထောင် (Bottle Flip)', desc: 'လူငယ်များနဲ့ ဆော့ရန် Challenge', icon: 'fa-bottle-water', color: 'text-[#25F4EE]', bg: 'bg-cyan-50' },
+            { day: 5, type: 'Q&A', title: 'နားမလည်နိုင်ဆုံး အကျင့်တစ်ခု?', desc: 'ယောကျာ်းလေး/မိန်းကလေး အကျင့်များ', icon: 'fa-microphone', color: 'text-[#FE2C55]', bg: 'bg-pink-50' },
+            { day: 6, type: 'Game', title: 'Blindfold Taste Test', desc: 'မျက်စိပိတ်ပြီး မုန့်မြည်းခိုင်းတဲ့ ဂိမ်း', icon: 'fa-cookie', color: 'text-[#25F4EE]', bg: 'bg-cyan-50' },
+            { day: 7, type: 'Recap', title: 'Week 1 Bloopers', desc: 'ပထမအပတ်ရဲ့ အရယ်ရဆုံး အလွဲများ', icon: 'fa-film', color: 'text-purple-500', bg: 'bg-purple-50' },
+            { day: 8, type: 'Q&A', title: 'အချစ်လား? ငွေလား?', desc: 'အင်းလျားကန်ဘောင် အင်တာဗျူး', icon: 'fa-microphone', color: 'text-[#FE2C55]', bg: 'bg-pink-50' },
+            { day: 9, type: 'Game', title: 'မျက်တောင်မခတ်ကြေး', desc: 'Don\'t Blink Challenge', icon: 'fa-eye', color: 'text-[#25F4EE]', bg: 'bg-cyan-50' },
+            { day: 10, type: 'Trend', title: 'TikTok Dance Trend', desc: 'လမ်းသွားလမ်းလာတွေကို သင်ပေးပြီး ကခြင်း', icon: 'fa-music', color: 'text-orange-500', bg: 'bg-orange-50' },
+            { day: 11, type: 'Q&A', title: 'အလှဆုံး/အချောဆုံးလို့ ထင်ရတဲ့အချိန်?', desc: 'Confidence မေးခွန်းများ', icon: 'fa-microphone', color: 'text-[#FE2C55]', bg: 'bg-pink-50' },
+            { day: 12, type: 'Game', title: 'Finish the lyrics', desc: 'သီချင်းစာသား တစ်ဝက်ဆိုပြပြီး ဆက်ဆိုခိုင်းခြင်း', icon: 'fa-music', color: 'text-[#25F4EE]', bg: 'bg-cyan-50' },
+            { day: 13, type: 'Q&A', title: 'အပျော်ဆုံးကိစ္စလေးတစ်ခု', desc: 'Positive Vibes မျှဝေခြင်း', icon: 'fa-face-smile', color: 'text-[#FE2C55]', bg: 'bg-pink-50' },
+            { day: 14, type: 'Vlog', title: 'လမ်းဘေးဈေးသည် အားပေးခြင်း', desc: 'Heartwarming content လေးလုပ်ခြင်း', icon: 'fa-heart', color: 'text-rose-500', bg: 'bg-rose-50' },
+            { day: 15, type: 'Promo', title: 'ပင်ပန်းရင် ဘာလုပ်လေ့ရှိလဲ?', desc: 'Energy Drink Sponsor Placement (စမ်းသပ်)', icon: 'fa-bolt', color: 'text-yellow-500', bg: 'bg-yellow-50' },
+            { day: 16, type: 'Game', title: 'Emoji နဲ့ ရုပ်ရှင်ခန့်မှန်း', desc: 'ပျော်ရွှင်စရာ ရုပ်ရှင်အမည် ခန့်မှန်းဂိမ်း', icon: 'fa-masks-theater', color: 'text-[#25F4EE]', bg: 'bg-cyan-50' },
+            { day: 17, type: 'Q&A', title: 'သိန်း ၁၀၀ ရရင် ဘာလုပ်မလဲ?', desc: 'ဆူးလေဝန်းကျင် မေးခွန်း', icon: 'fa-microphone', color: 'text-[#FE2C55]', bg: 'bg-pink-50' },
+            { day: 18, type: 'Promo', title: 'ဈေးနှုန်းခန့်မှန်းဂိမ်း', desc: 'ပစ္စည်းတစ်ခုပြပြီး ဈေးနှုန်းခန့်မှန်းခိုင်းခြင်း', icon: 'fa-tag', color: 'text-yellow-500', bg: 'bg-yellow-50' },
+            { day: 19, type: 'Q&A', title: 'အကောင်းဆုံး ဆိုင်တစ်ဆိုင် ညွှန်းပေးပါ', desc: 'Food Vlog အတွက် အစပျိုးခြင်း', icon: 'fa-utensils', color: 'text-[#FE2C55]', bg: 'bg-pink-50' },
+            { day: 20, type: 'Game', title: 'Whisper Challenge', desc: 'နားကြပ်တပ်ပြီး စကားပြောခန့်မှန်းခြင်း', icon: 'fa-headphones', color: 'text-[#25F4EE]', bg: 'bg-cyan-50' },
+            { day: 21, type: 'Recap', title: 'Behind the Scenes', desc: 'ရိုက်ကူးရေးလုပ်ရတဲ့ အခက်အခဲနဲ့ အပျော်တမ်း', icon: 'fa-video', color: 'text-purple-500', bg: 'bg-purple-50' },
+            { day: 22, type: 'Q&A', title: 'ဘယ်နေရာကို အသွားချင်ဆုံးလဲ?', desc: 'Travel Vlog ကို ကူးရန် အစပျိုးမေးခွန်း', icon: 'fa-plane-departure', color: 'text-[#FE2C55]', bg: 'bg-pink-50' },
+            { day: 23, type: 'Game', title: 'Charades', desc: 'အမူအရာဖြင့် စကားလုံးခန့်မှန်းခြင်း', icon: 'fa-person-running', color: 'text-[#25F4EE]', bg: 'bg-cyan-50' },
+            { day: 24, type: 'Q&A', title: 'ခရီးစဉ်မှာ အမှတ်တရအဖြစ်ဆုံးကိစ္စ?', desc: 'ခရီးသွား အတွေ့အကြုံ မေးမြန်းခြင်း', icon: 'fa-microphone', color: 'text-[#FE2C55]', bg: 'bg-pink-50' },
+            { day: 25, type: 'Game', title: 'Math Game', desc: '၃ နဲ့စားလို့ပြတ်တဲ့ ဂဏန်းတွေမှာ လက်ခုပ်တီး', icon: 'fa-calculator', color: 'text-[#25F4EE]', bg: 'bg-cyan-50' },
+            { day: 26, type: 'Promo', title: 'Direct Ad Pitch', desc: 'ကြော်ငြာလက်ခံကြောင်း ရယ်စရာ Video တို', icon: 'fa-bullhorn', color: 'text-yellow-500', bg: 'bg-yellow-50' },
+            { day: 27, type: 'Q&A', title: 'ကျောင်းမှာလုပ်ခဲ့တဲ့ အဆိုးဆုံးအလုပ်?', desc: 'Nostalgic Q&A', icon: 'fa-school', color: 'text-[#FE2C55]', bg: 'bg-pink-50' },
+            { day: 28, type: 'Promo', title: 'Brand ခန့်မှန်းဂိမ်း', desc: 'မုန့်တစ်ခုကို မျက်စိပိတ်စားပြီး Brand ခန့်မှန်း', icon: 'fa-cookie-bite', color: 'text-yellow-500', bg: 'bg-yellow-50' },
+            { day: 29, type: 'Vlog', title: 'Travel Teaser', desc: 'ပဲခူး၊ သန်လျင် ခရီးသွားအစီအစဉ် Teaser', icon: 'fa-map-location-dot', color: 'text-rose-500', bg: 'bg-rose-50' },
+            { day: 30, type: 'Recap', title: '1 Month Milestone', desc: 'ပရိသတ်ကို ကျေးဇူးတင်စကားနဲ့ Highlight များ', icon: 'fa-trophy', color: 'text-yellow-500', bg: 'bg-yellow-100' }
+        ];
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+            
+            calendarData.forEach(item => {
+                let borderClass = item.day <= 7 ? 'border-pink-200' : (item.day <= 14 ? 'border-cyan-200' : (item.day <= 21 ? 'border-purple-200' : 'border-slate-200'));
+                
+                const card = document.createElement('div');
+                card.className = `bg-white p-4 rounded-2xl border ${borderClass} shadow-sm hover:shadow-md transition cursor-pointer flex flex-col h-full`;
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="text-xs font-bold bg-slate-100 text-slate-500 px-2 py-1 rounded-md">Day ${item.day}</span>
+                        <div class="w-8 h-8 rounded-full ${item.bg} flex items-center justify-center">
+                            <i class="fa-solid ${item.icon} ${item.color} text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="mt-auto">
+                        <span class="text-[10px] font-bold uppercase tracking-wider ${item.color} mb-1 block">${item.type}</span>
+                        <h4 class="font-bold text-sm text-slate-800 leading-tight mb-1">${item.title}</h4>
+                        <p class="text-xs text-slate-500 line-clamp-2">${item.desc}</p>
+                    </div>
+                `;
+                // Add click event to pre-fill AI chat
+                card.onclick = () => {
+                    switchTab('ai-assistant');
+                    sendPrompt(`Day ${item.day} အတွက် "${item.title}" ဆိုတဲ့ ${item.type} အစီအစဉ်လေးကို ရိုက်ကူးဖို့ အသေးစိတ် ဇာတ်ညွှန်းလေး (သို့) အကြံဉာဏ်လေး ပေးပါ။`);
+                };
+                grid.appendChild(card);
+            });
+        }
+
+        // Initialize calendar on load
+        renderCalendar();
+
+        // ----------------------------------------------------
+        // AI Chatbot Integration (Gemini API)
+        // ----------------------------------------------------
+        const chatHistoryContainer = document.getElementById('chat-history');
+        const chatInput = document.getElementById('chat-input');
+        const chatForm = document.getElementById('chat-form');
+        const loadingIndicator = document.getElementById('ai-loading');
+        const sendBtn = document.getElementById('send-btn');
+
+        // Conversation history for context
+        let conversationContext = [];
+
+        function appendMessage(text, isUser) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex ${isUser ? 'justify-end' : 'justify-start'} mb-2`;
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `p-4 max-w-[85%] rounded-2xl shadow-sm text-sm leading-relaxed ${
+                isUser 
+                ? 'bg-slate-900 text-white rounded-tr-sm' 
+                : 'bg-white border border-slate-200 text-slate-800 rounded-tl-sm'
+            }`;
+            
+            // Format text (simple markdown to HTML for bold and line breaks)
+            let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            formattedText = formattedText.replace(/\n/g, '<br>');
+            
+            messageDiv.innerHTML = formattedText;
+            wrapper.appendChild(messageDiv);
+            chatHistoryContainer.appendChild(wrapper);
+            
+            // Scroll to bottom
+            chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+        }
+
+        function sendPrompt(text) {
+            chatInput.value = text;
+            handleChatSubmit(new Event('submit'));
+        }
+
+        function clearChat() {
+            chatHistoryContainer.innerHTML = '';
+            conversationContext = [];
+            appendMessage("မင်္ဂလာပါ။ <strong>Ai Content Lab</strong> ရဲ့ အကူအညီပေးရေး AI ကနေ ကြိုဆိုပါတယ်။ အသစ်ပြန်လည် စတင်နိုင်ပါပြီ။", false);
+        }
+
+        async function handleChatSubmit(e) {
+            e.preventDefault();
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            // 1. Show user message
+            appendMessage(message, true);
+            chatInput.value = '';
+            chatInput.disabled = true;
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            loadingIndicator.classList.remove('hidden');
+
+            // 2. Prepare payload for Gemini API
+            const apiKey = ""; // Left empty as per Canvas instructions
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+            
+            // Add to context
+            conversationContext.push({ role: "user", parts: [{ text: message }] });
+
+            const payload = {
+                contents: conversationContext,
+                systemInstruction: {
+                    parts: [{ text: "You are an expert TikTok Content Strategist and AI Assistant for 'Ai Content Lab', a production team based in Yangon, Myanmar. You help generate fun, viral Q&A ideas, engaging street mini-games, and clever product placement strategies for the Yangon youth audience (Hledan, Sule, etc.). Respond warmly and professionally in Burmese language. Keep answers practical, creative, and ready to use for video shooting." }]
+                }
+            };
+
+            // 3. Make the API Call with exponential backoff logic (simplified)
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0].text) {
+                    const aiReply = result.candidates[0].content.parts[0].text;
+                    
+                    // Show AI response
+                    appendMessage(aiReply, false);
+                    
+                    // Save to context
+                    conversationContext.push({ role: "model", parts: [{ text: aiReply }] });
+                } else {
+                    appendMessage("တောင်းပန်ပါတယ်။ စနစ်ချို့ယွင်းမှုဖြစ်သွားပါတယ်။ ကျေးဇူးပြုပြီး ခဏနေမှ ထပ်မေးပေးပါ။", false);
+                }
+
+            } catch (error) {
+                // If network error or API key missing locally (handled by Canvas runtime usually)
+                appendMessage("အင်တာနက်ချိတ်ဆက်မှု အခက်အခဲရှိနေပါတယ်။ ကျေးဇူးပြုပြီး ထပ်မံကြိုးစားကြည့်ပါ။", false);
+            } finally {
+                // Reset UI
+                chatInput.disabled = false;
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
+                loadingIndicator.classList.add('hidden');
+                chatInput.focus();
+            }
+        }
+    </script>
+</body>
+</html>
